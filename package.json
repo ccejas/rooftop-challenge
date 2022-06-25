@@ -1,0 +1,16 @@
+{
+  "name": "rooftop",
+  "version": "1.0.0",
+  "description": "challenge for rooftop academy",
+  "main": "index.js",
+  "scripts": {
+    "check": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "cristian.cejas@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "node-fetch": "^3.2.6"
+  }
+}
