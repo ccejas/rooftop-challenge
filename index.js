@@ -65,6 +65,22 @@ async function check(blocks, token) {
   return result;
 }
 
+async function isBlocksOrderOk(data, token) {
+  const response = await fetch(getCheckBlocksEndpoint(token), {
+    method: "POST",
+    body: JSON.stringify({
+      encoded: data,
+    }),
+    headers: { "Content-Type": "application/json" },
+  });
+  const body = await response.json();
+  return body.message;
+}
+
+async function checkOrder(blocks, token) {
+  return isBlocksOrderOk(blocks.join(""), token);
+}
+
 async function main() {
   const token = await getToken();
   console.log("TOKEN:", token);
@@ -75,6 +91,9 @@ async function main() {
   const sortedBlocks = await check(blocks, token);
   console.log("SORTED BLOCKS:");
   console.table(sortedBlocks);
+
+  const isCorrectOrder = await checkOrder(sortedBlocks, token);
+  console.log("CORRECT ORDER:", isCorrectOrder);
 }
 
 main()
