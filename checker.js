@@ -1,8 +1,6 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
-// const fetch = (...args) =>
-//   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 const fetch = require("node-fetch");
 
 async function get(url) {
