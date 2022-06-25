@@ -4,14 +4,18 @@ dotenv.config();
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
+async function get(url) {
+  const response = await fetch(url);
+  return response.json();
+}
+
 function getTokenEndpoint() {
   return `${process.env.BASE_URL}/token?email=${process.env.USER_MAIL}`;
 }
 
 async function getToken() {
-  const response = await fetch(getTokenEndpoint());
-  const body = await response.json();
-  return body.token;
+  const response = await get(getTokenEndpoint());
+  return response.token;
 }
 
 function getBlocksEndpoint(token) {
@@ -19,13 +23,21 @@ function getBlocksEndpoint(token) {
 }
 
 async function getBlocks(token) {
-  const response = await fetch(getBlocksEndpoint(token));
-  const body = await response.json();
-  return body.data;
+  const response = await get(getBlocksEndpoint(token));
+  return response.data;
 }
 
 function getCheckBlocksEndpoint(token) {
   return `${process.env.BASE_URL}/check?token=${token}`;
+}
+
+async function post(url, body) {
+  const response = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+  });
+  return response.json();
 }
 
 async function areConsecutiveBlocks(block1, block2, token) {
@@ -58,15 +70,6 @@ async function check(blocks, token) {
   } while (result.length !== blocks.length);
   console.groupEnd();
   return result;
-}
-
-async function post(url, body) {
-  const response = await fetch(url, {
-    method: "POST",
-    body: JSON.stringify(body),
-    headers: { "Content-Type": "application/json" },
-  });
-  return response.json();
 }
 
 async function isBlocksOrderOk(data, token) {
