@@ -29,15 +29,10 @@ function getCheckBlocksEndpoint(token) {
 }
 
 async function areConsecutiveBlocks(block1, block2, token) {
-  const response = await fetch(getCheckBlocksEndpoint(token), {
-    method: "POST",
-    body: JSON.stringify({
-      blocks: [block1, block2],
-    }),
-    headers: { "Content-Type": "application/json" },
+  const response = await post(getCheckBlocksEndpoint(token), {
+    blocks: [block1, block2],
   });
-  const body = await response.json();
-  return body.message;
+  return response.message;
 }
 
 async function check(blocks, token) {
@@ -65,16 +60,20 @@ async function check(blocks, token) {
   return result;
 }
 
-async function isBlocksOrderOk(data, token) {
-  const response = await fetch(getCheckBlocksEndpoint(token), {
+async function post(url, body) {
+  const response = await fetch(url, {
     method: "POST",
-    body: JSON.stringify({
-      encoded: data,
-    }),
+    body: JSON.stringify(body),
     headers: { "Content-Type": "application/json" },
   });
-  const body = await response.json();
-  return body.message;
+  return response.json();
+}
+
+async function isBlocksOrderOk(data, token) {
+  const response = await post(getCheckBlocksEndpoint(token), {
+    encoded: data,
+  });
+  return response.message;
 }
 
 async function checkOrder(blocks, token) {
