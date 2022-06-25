@@ -1,103 +1,17 @@
-const dotenv = require("dotenv");
-dotenv.config();
-
-const fetch = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
-
-async function get(url) {
-  const response = await fetch(url);
-  return response.json();
-}
-
-function getTokenEndpoint() {
-  return `${process.env.BASE_URL}/token?email=${process.env.USER_MAIL}`;
-}
-
-async function getToken() {
-  const response = await get(getTokenEndpoint());
-  return response.token;
-}
-
-function getBlocksEndpoint(token) {
-  return `${process.env.BASE_URL}/blocks?token=${token}`;
-}
-
-async function getBlocks(token) {
-  const response = await get(getBlocksEndpoint(token));
-  return response.data;
-}
-
-function getCheckBlocksEndpoint(token) {
-  return `${process.env.BASE_URL}/check?token=${token}`;
-}
-
-async function post(url, body) {
-  const response = await fetch(url, {
-    method: "POST",
-    body: JSON.stringify(body),
-    headers: { "Content-Type": "application/json" },
-  });
-  return response.json();
-}
-
-async function areConsecutiveBlocks(block1, block2, token) {
-  const response = await post(getCheckBlocksEndpoint(token), {
-    blocks: [block1, block2],
-  });
-  return response.message;
-}
-
-async function getNextBlock(currentBlock, blocks, token) {
-  console.info("searching next ordered block...");
-  for (let index = 1; index < blocks.length; index++) {
-    if (await areConsecutiveBlocks(currentBlock, blocks[index], token)) {
-      console.info("found it!");
-      return blocks[index];
-    }
-  }
-  return null;
-}
-
-async function check(blocks, token) {
-  console.group();
-  const result = [blocks[0]]; //By definition the first item is in the correct position
-  do {
-    const orderedTokensLength = result.length;
-    const nextBlock = await getNextBlock(
-      result[orderedTokensLength - 1],
-      blocks,
-      token
-    );
-    if (!nextBlock) throw `Next block can not be found!`;
-    result.push(nextBlock);
-  } while (result.length !== blocks.length);
-  console.groupEnd();
-  return result;
-}
-
-async function isBlocksOrderOk(data, token) {
-  const response = await post(getCheckBlocksEndpoint(token), {
-    encoded: data,
-  });
-  return response.message;
-}
-
-async function checkOrder(blocks, token) {
-  return isBlocksOrderOk(blocks.join(""), token);
-}
+const checker = require("./checker");
 
 async function main() {
-  const token = await getToken();
+  const token = await checker.getToken();
   console.log("TOKEN:", token);
 
-  const blocks = await getBlocks(token);
+  const blocks = await checker.getBlocks(token);
   console.log("BLOCKS:", blocks);
 
-  const sortedBlocks = await check(blocks, token);
+  const sortedBlocks = await checker.check(blocks, token);
   console.log("SORTED BLOCKS:");
   console.table(sortedBlocks);
 
-  const isCorrectOrder = await checkOrder(sortedBlocks, token);
+  const isCorrectOrder = await checker.checkOrder(sortedBlocks, token);
   console.log("CORRECT ORDER:", isCorrectOrder);
 }
 
