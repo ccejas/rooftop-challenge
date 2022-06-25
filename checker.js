@@ -39,6 +39,7 @@ async function areConsecutiveBlocks(block1, block2, token) {
 async function getNextBlock(currentBlock, blocks, token) {
   console.info("searching next ordered block...");
   for (let index = 1; index < blocks.length; index++) {
+    if (currentBlock === blocks[index]) continue; //ignore comparison with itself
     if (await areConsecutiveBlocks(currentBlock, blocks[index], token)) {
       console.info("found it!");
       return blocks[index];
