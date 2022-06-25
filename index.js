@@ -47,26 +47,29 @@ async function areConsecutiveBlocks(block1, block2, token) {
   return response.message;
 }
 
+async function getNextBlock(currentBlock, blocks, token) {
+  console.info("searching next ordered block...");
+  for (let index = 1; index < blocks.length; index++) {
+    if (await areConsecutiveBlocks(currentBlock, blocks[index], token)) {
+      console.info("found it!");
+      return blocks[index];
+    }
+  }
+  return null;
+}
+
 async function check(blocks, token) {
   console.group();
-  const result = [blocks[0]];
+  const result = [blocks[0]]; //By definition the first item is in the correct position
   do {
     const orderedTokensLength = result.length;
-    console.info("searching next ordered block...");
-    for (let index = 1; index < blocks.length; index++) {
-      if (
-        await areConsecutiveBlocks(
-          result[orderedTokensLength - 1],
-          blocks[index],
-          token
-        )
-      ) {
-        result.push(blocks[index]);
-        console.info("found it!");
-        break;
-      }
-    }
-    if (orderedTokensLength === result.length) throw `Blocks can't be ordered!`;
+    const nextBlock = await getNextBlock(
+      result[orderedTokensLength - 1],
+      blocks,
+      token
+    );
+    if (!nextBlock) throw `Next block can not be found!`;
+    result.push(nextBlock);
   } while (result.length !== blocks.length);
   console.groupEnd();
   return result;
