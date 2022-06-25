@@ -1,5 +1,7 @@
 # Challenge: Career Switch 2022
 
+For this challenge we have to do a script to consume an API REST. This API provides us an array of data, and we need to sort it consuming a other endpoint. Also we can verify the sorted array using the same API too
+
 ## How to install
 
 To install all dependencies run:
